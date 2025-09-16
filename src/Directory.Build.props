@@ -3,7 +3,7 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <Version>1.0.2</Version>
+        <Version>1.0.3</Version>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <RepositoryUrl>https://github.com/AlexandreIorio/dotlogs</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
