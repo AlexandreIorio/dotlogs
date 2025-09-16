@@ -1,7 +1,0 @@
-<Project>
-    <PropertyGroup>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    </PropertyGroup>
-</Project>
