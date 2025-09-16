@@ -1,4 +1,4 @@
-name: Build and Test
+name: Tag, release and publish NuGet
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Tag release and build Docker image
+      - name: Tag and release
         uses: alexandreiorio/actions/dotnet/tag-and-release@main
         with:   
           version-file: src/DotLogs.csproj
