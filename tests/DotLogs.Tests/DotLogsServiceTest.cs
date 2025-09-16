@@ -23,6 +23,14 @@ public class DotLogsServiceTest
         Log.CloseAndFlush();
     }
 
+    [OneTimeTearDown]
+    public void OneTimeTearDown()
+    {
+        //Cleanup the logs folder after all tests have run
+        if (Directory.Exists(DotLogsService.LogsFolder))
+            Directory.Delete(DotLogsService.LogsFolder, true);
+    }
+
     private DotLogsService _dotLogsService = null!;
 
     [Test]
@@ -185,5 +193,77 @@ public class DotLogsServiceTest
         var configuration = _dotLogsService.GetConfiguration();
         // Assert
         Assert.That(configuration.LogToConsole, Is.False);
+    }
+
+    [Test]
+    public void MultipleInstances_CorrectlyLog()
+    {
+        // Arrange
+        var message1 = "This is an information message from instance 1.";
+        var message2 = "This is an information message from instance 2.";
+
+        // Act
+        using (var dotLogsService1 = new DotLogsService())
+        using (var dotLogsService2 = new DotLogsService())
+        {
+            dotLogsService1.DisableConsoleLogging();
+            dotLogsService2.DisableConsoleLogging();
+            dotLogsService1.LogInformation(message1);
+            dotLogsService2.LogInformation(message2);
+            var logFilePath = dotLogsService1.CurrentLogFile;
+
+            // Assert
+            Assert.That(File.Exists(logFilePath), Is.True);
+            Assert.That(File.Exists(logFilePath), Is.True);
+            string logContent;
+            using (var stream = File.Open(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var reader = new StreamReader(stream))
+            {
+                logContent = reader.ReadToEnd();
+            }
+
+
+            Assert.That(logContent, Does.Contain(message1));
+            Assert.That(logContent, Does.Contain(message2));
+        }
+    }
+
+    [Test]
+    public void MultipleInstances_CorrectlyLog_on_loop()
+    {
+        const int ITERATIONS = 100;
+        // Act
+        using (var dotLogsService1 = new DotLogsService())
+        using (var dotLogsService2 = new DotLogsService())
+        {
+            dotLogsService1.DisableConsoleLogging();
+            dotLogsService2.DisableConsoleLogging();
+
+            string[] messages1 = new string[ITERATIONS];
+            string[] messages2 = new string[ITERATIONS];
+
+            for (int i = 0; i < ITERATIONS; i++)
+            {
+                messages1[i] = "message from instance 1 - " + i;
+                messages2[i] = "message from instance 2 - " + i;
+                dotLogsService1.LogInformation(messages1[i]);
+                dotLogsService2.LogInformation(messages2[i]);
+            }
+            var logFilePath = dotLogsService1.CurrentLogFile;
+            // Assert
+            Assert.That(File.Exists(logFilePath), Is.True);
+            string logContent;
+            using (var stream = File.Open(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var reader = new StreamReader(stream))
+            {
+                logContent = reader.ReadToEnd();
+            }
+
+            for (int i = 0; i < ITERATIONS; i++)
+            {
+                Assert.That(logContent, Does.Contain(messages1[i]));
+                Assert.That(logContent, Does.Contain(messages2[i]));
+            }
+        }
     }
 }

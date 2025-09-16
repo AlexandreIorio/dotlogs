@@ -35,14 +35,14 @@ public class DotLogsService : IDisposable
     public readonly string LogsConfigFilePath = Path.Combine(LogsFolder, LogsConfigFile);
 
     private LogServiceConfiguration _configuration;
-    private ILogger _logger;
     private LogServiceConfiguration _prevConfiguration;
-
 
     /// <summary>
     ///     Event that is triggered when the log configuration is updated.
     /// </summary>
     public Action? ConfigurationUpdated;
+
+    private static readonly Lock LoggerLock = new();
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="DotLogsService" /> class.
@@ -60,7 +60,6 @@ public class DotLogsService : IDisposable
 
         ConfigureLogger();
         _prevConfiguration = _configuration.Copy();
-        _logger = Log.Logger;
     }
 
     /// <summary>
@@ -277,7 +276,7 @@ public class DotLogsService : IDisposable
         Log.Information("File logging enabled");
     }
 
-    private void CreateLog(
+    private static void CreateLog(
         LogEventLevel level,
         string caller,
         string message,
@@ -286,11 +285,14 @@ public class DotLogsService : IDisposable
     )
     {
         var fileName = Path.GetFileName(callerFilePath);
-        _logger
-            .ForContext("Caller", caller)
-            .ForContext("file", fileName)
-            .ForContext("line", callerLineNumber)
-            .Write(level, message);
+        lock (LoggerLock)
+        {
+            Log.Logger
+                .ForContext("Caller", caller)
+                .ForContext("file", fileName)
+                .ForContext("line", callerLineNumber)
+                .Write(level, message);
+        }
     }
 
     private void SaveConfiguration()
@@ -329,7 +331,6 @@ public class DotLogsService : IDisposable
             );
 
         Log.Logger = loggerConfig.CreateLogger();
-        _logger = Log.Logger;
     }
 
     private void UpdateConfiguration()
