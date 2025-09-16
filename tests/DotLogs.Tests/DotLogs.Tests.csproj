@@ -25,7 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\DotLogs.csproj"/>
+        <ProjectReference Include="..\..\src\DotLogs\DotLogs.csproj" />
     </ItemGroup>
 
 </Project>

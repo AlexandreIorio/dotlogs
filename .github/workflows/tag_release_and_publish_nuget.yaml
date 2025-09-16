@@ -18,14 +18,22 @@ jobs:
       - name: Tag and release
         uses: alexandreiorio/actions/dotnet/tag-and-release@main
         with:   
-          version-file: src/DotLogs.csproj
+          version-file: Directory.Build.props
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push NuGet Package
+      - name: Push DotLogs NuGet Package
         if: success()
         uses: alexandreiorio/actions/dotnet/push-nuget@main
         with:
-          project-path: './src/DotLogs.csproj'
+          project-path: './src/DotLogs/DotLogs.csproj'
+          nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+          nuget-source: 'https://api.nuget.org/v3/index.json'
+
+      - name: Push DotLogs.AspNet NuGet Package
+        if: success()
+        uses: alexandreiorio/actions/dotnet/push-nuget@main
+        with:
+          project-path: './src/DotLogs.AspNet/DotLogs.AspNet.csproj'
           nuget-api-key: ${{ secrets.NUGET_API_KEY }}
           nuget-source: 'https://api.nuget.org/v3/index.json'

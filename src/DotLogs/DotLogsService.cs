@@ -12,7 +12,7 @@ namespace DotLogs;
 /// <summary>
 ///     A service for logging messages to console and/or file with dynamic configuration.
 /// </summary>
-public class LogService : IDisposable
+public class DotLogsService : IDisposable
 {
     /// <summary>
     ///     The folder where log files and configuration are stored.
@@ -45,9 +45,9 @@ public class LogService : IDisposable
     public Action? ConfigurationUpdated;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="DotLogs.LogService" /> class.
+    ///     Initializes a new instance of the <see cref="DotLogsService" /> class.
     /// </summary>
-    public LogService()
+    public DotLogsService()
     {
         LoadConfiguration();
         _configuration ??= new LogServiceConfiguration();
@@ -401,7 +401,7 @@ public class LogService : IDisposable
 }
 
 /// <summary>
-///     Configuration settings for the <see cref="LogService" />.
+///     Configuration settings for the <see cref="DotLogsService" />.
 /// </summary>
 public sealed class LogServiceConfiguration
 {

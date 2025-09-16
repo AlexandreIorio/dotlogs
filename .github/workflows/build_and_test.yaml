@@ -14,4 +14,4 @@ jobs:
       - name: Build and Test
         uses: alexandreiorio/actions/dotnet/build_and_test@main
         with:
-            src-path: '.'
+            src-path: './src'
