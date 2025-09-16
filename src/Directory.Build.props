@@ -4,5 +4,11 @@
         <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <Version>1.0.1</Version>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
 </Project>

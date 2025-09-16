@@ -9,7 +9,7 @@ namespace DotLogs.AspNet;
 [Route("api/[controller]")]
 public class DotLogsController : ControllerBase
 {
-    private DotLogsService _dotLogsService;
+    private readonly DotLogsService _dotLogsService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DotLogsController"/> class.
