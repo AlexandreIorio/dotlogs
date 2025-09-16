@@ -496,20 +496,4 @@ internal static class LogLevelExtension
             _ => LogEventLevel.Information
         };
     }
-
-    // Mapping Microsoft.Extensions.Logging.LogLevel -> Serilog LogEventLevel
-    internal static LogEventLevel ToSerilogLevel(this LogLevel level)
-    {
-        return level switch
-        {
-            LogLevel.Trace => LogEventLevel.Verbose,
-            LogLevel.Debug => LogEventLevel.Debug,
-            LogLevel.Information => LogEventLevel.Information,
-            LogLevel.Warning => LogEventLevel.Warning,
-            LogLevel.Error => LogEventLevel.Error,
-            LogLevel.Critical => LogEventLevel.Fatal,
-            LogLevel.None => LogEventLevel.Fatal, // non utilisé car filtré plus haut
-            _ => LogEventLevel.Information
-        };
-    }
 }
