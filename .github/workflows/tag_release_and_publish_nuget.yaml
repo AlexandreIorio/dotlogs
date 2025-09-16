@@ -21,6 +21,8 @@ jobs:
         uses: alexandreiorio/actions/dotnet/tag-and-release@main
         with:   
           version-file: src/DotLogs.csproj
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push NuGet Package
         if: success()
