@@ -1,4 +1,4 @@
-name: Tag, release and publish NuGet 
+name: Tag, release and publish NuGet
 
 on:
   pull_request:
