@@ -3,5 +3,6 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Version>1.0.1</Version>
     </PropertyGroup>
 </Project>
