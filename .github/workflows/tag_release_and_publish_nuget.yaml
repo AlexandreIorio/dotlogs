@@ -18,7 +18,7 @@ jobs:
       - name: Tag and release
         uses: alexandreiorio/actions/dotnet/tag-and-release@main
         with:   
-          version-file: src/DotLogs.csproj
+          version-file: Directory.Build.props
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
