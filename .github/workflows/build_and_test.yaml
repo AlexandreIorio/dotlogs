@@ -1,0 +1,17 @@
+name: Build and Test
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build and Test
+        uses: alexandreiorio/actions/dotnet/build_and_test@main
+        with:
+            src-path: '.'
