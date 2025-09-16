@@ -1,9 +1,12 @@
-name: Tag, release and publish NuGet
+name: Tag, release and publish NuGet 
 
 on:
   pull_request:
     types: [closed]
     branches: [ main ]
+
+permissions:
+    contents: write
 
 jobs:
   Release_tag_and_publish_nuget:
