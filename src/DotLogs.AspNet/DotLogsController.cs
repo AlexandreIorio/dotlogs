@@ -9,15 +9,15 @@ namespace DotLogs.AspNet;
 [Route("api/[controller]")]
 public class DotLogsController : ControllerBase
 {
-    private LogService _logService;
+    private DotLogsService _dotLogsService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DotLogsController"/> class.
     /// </summary>
-    /// <param name="logService"> The logging service to be used by the controller.</param>
-    public DotLogsController(LogService logService)
+    /// <param name="dotLogsService"> The logging service to be used by the controller.</param>
+    public DotLogsController(DotLogsService dotLogsService)
     {
-        _logService = logService;
+        _dotLogsService = dotLogsService;
     }
 
     /// <summary>
@@ -27,8 +27,8 @@ public class DotLogsController : ControllerBase
     [HttpPost("disable")]
     public IActionResult DisableLogs()
     {
-        _logService.DisableConsoleLogging();
-        _logService.DisableFileLogging();
+        _dotLogsService.DisableConsoleLogging();
+        _dotLogsService.DisableFileLogging();
         return Ok(new { message = "Logging disabled (console and file)." });
     }
 
@@ -39,8 +39,8 @@ public class DotLogsController : ControllerBase
     [HttpPost("enable")]
     public IActionResult EnableLogs()
     {
-        _logService.EnableConsoleLogging();
-        _logService.EnableFileLogging();
+        _dotLogsService.EnableConsoleLogging();
+        _dotLogsService.EnableFileLogging();
         return Ok(new { message = "Logging enabled (console and file)." });
     }
 
@@ -52,7 +52,7 @@ public class DotLogsController : ControllerBase
     [HttpGet("status")]
     public IActionResult GetLogStatus()
     {
-        var status = _logService.GetConfiguration();
+        var status = _dotLogsService.GetConfiguration();
         return Ok(status);
     }
 
@@ -63,7 +63,7 @@ public class DotLogsController : ControllerBase
     [HttpPost("disable-console")]
     public IActionResult DisableConsoleLogging()
     {
-        _logService.DisableConsoleLogging();
+        _dotLogsService.DisableConsoleLogging();
         return Ok(new { message = "Console logging disabled." });
     }
 
@@ -74,7 +74,7 @@ public class DotLogsController : ControllerBase
     [HttpPost("enable-console")]
     public IActionResult EnableConsoleLogging()
     {
-        _logService.EnableConsoleLogging();
+        _dotLogsService.EnableConsoleLogging();
         return Ok(new { message = "Console logging enabled." });
     }
 
@@ -85,7 +85,7 @@ public class DotLogsController : ControllerBase
     [HttpPost("disable-file")]
     public IActionResult DisableFileLogging()
     {
-        _logService.DisableFileLogging();
+        _dotLogsService.DisableFileLogging();
         return Ok(new { message = "File logging disabled." });
     }
 
@@ -96,7 +96,7 @@ public class DotLogsController : ControllerBase
     [HttpPost("enable-file")]
     public IActionResult EnableFileLogging()
     {
-        _logService.EnableFileLogging();
+        _dotLogsService.EnableFileLogging();
         return Ok(new { message = "File logging enabled." });
     }
 
@@ -112,7 +112,7 @@ public class DotLogsController : ControllerBase
 
         try
         {
-            _logService.SetLevel(level);
+            _dotLogsService.SetLevel(level);
             return Ok(new { message = $"Log level set to {level}." });
         }
         catch (ArgumentException ex)

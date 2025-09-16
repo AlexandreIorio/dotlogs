@@ -5,32 +5,32 @@ namespace DotLogs.Tests;
 
 [TestFixture]
 [NonParallelizable]
-public class LogServiceTest
+public class DotLogsServiceTest
 {
     [SetUp]
     public void Setup()
     {
-        if (Directory.Exists(LogService.LogsFolder))
-            Directory.Delete(LogService.LogsFolder, true);
-        _logService = new LogService();
-        _logService.DisableConsoleLogging();
+        if (Directory.Exists(DotLogsService.LogsFolder))
+            Directory.Delete(DotLogsService.LogsFolder, true);
+        _dotLogsService = new DotLogsService();
+        _dotLogsService.DisableConsoleLogging();
     }
 
     [TearDown]
     public void TearDown()
     {
-        _logService.Dispose();
+        _dotLogsService.Dispose();
         Log.CloseAndFlush();
     }
 
-    private LogService _logService = null!;
+    private DotLogsService _dotLogsService = null!;
 
     [Test]
     public void LogService_Initialization()
     {
         // Assert
-        Assert.That(_logService, Is.Not.Null);
-        Assert.That(File.Exists(_logService.LogsConfigFilePath), Is.True);
+        Assert.That(_dotLogsService, Is.Not.Null);
+        Assert.That(File.Exists(_dotLogsService.LogsConfigFilePath), Is.True);
     }
 
     [Test]
@@ -40,8 +40,8 @@ public class LogServiceTest
         var message = "This is an information message.";
 
         // Act
-        _logService.LogInformation(message);
-        var logFilePath = _logService.CurrentLogFile;
+        _dotLogsService.LogInformation(message);
+        var logFilePath = _dotLogsService.CurrentLogFile;
 
         // Assert
         Assert.That(File.Exists(logFilePath), Is.True);
@@ -63,19 +63,19 @@ public class LogServiceTest
         var traceMessageAfterUpdate = "This is a trace message for after update.";
 
         // Act
-        _logService.LogTrace(traceMessageBeforeUpdate);
-        var initialConfig = File.ReadAllText(_logService.LogsConfigFilePath);
+        _dotLogsService.LogTrace(traceMessageBeforeUpdate);
+        var initialConfig = File.ReadAllText(_dotLogsService.LogsConfigFilePath);
         initialConfig = initialConfig.Replace("Information", "Trace");
-        File.WriteAllText(_logService.LogsConfigFilePath, initialConfig);
+        File.WriteAllText(_dotLogsService.LogsConfigFilePath, initialConfig);
         var configurationUpdated = false;
 
-        _logService.ConfigurationUpdated += () => configurationUpdated = true;
+        _dotLogsService.ConfigurationUpdated += () => configurationUpdated = true;
 
         while (!configurationUpdated)
             Thread.Sleep(100); // Wait for the configuration to be reloaded
 
-        _logService.LogTrace(traceMessageAfterUpdate);
-        var logFilePath = _logService.CurrentLogFile;
+        _dotLogsService.LogTrace(traceMessageAfterUpdate);
+        var logFilePath = _dotLogsService.CurrentLogFile;
         string logContent;
         using (var stream = File.Open(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         using (var reader = new StreamReader(stream))
@@ -98,10 +98,10 @@ public class LogServiceTest
         logServiceConfiguration.LogToConsole = false;
 
         // Act
-        _logService.SetConfiguration(logServiceConfiguration);
+        _dotLogsService.SetConfiguration(logServiceConfiguration);
 
         // Assert
-        var updatedConfig = File.ReadAllText(_logService.LogsConfigFilePath);
+        var updatedConfig = File.ReadAllText(_dotLogsService.LogsConfigFilePath);
         Assert.That(updatedConfig, Does.Contain(logServiceConfiguration.LogLevel));
     }
 
@@ -110,8 +110,8 @@ public class LogServiceTest
     {
         var logServiceConfiguration = new LogServiceConfiguration();
         logServiceConfiguration.LogToConsole = false;
-        _logService.SetConfiguration(logServiceConfiguration);
-        _logService.DisableConsoleLogging();
+        _dotLogsService.SetConfiguration(logServiceConfiguration);
+        _dotLogsService.DisableConsoleLogging();
         LogService_CorrectlyWatchConfigurationFile();
     }
 
@@ -119,11 +119,11 @@ public class LogServiceTest
     public void LogService_CorrectlyLogsDifferentLevels()
     {
         // Arrange
-        var initialConfig = File.ReadAllText(_logService.LogsConfigFilePath);
+        var initialConfig = File.ReadAllText(_dotLogsService.LogsConfigFilePath);
         initialConfig = initialConfig.Replace("Information", "Trace");
-        File.WriteAllText(_logService.LogsConfigFilePath, initialConfig);
+        File.WriteAllText(_dotLogsService.LogsConfigFilePath, initialConfig);
         var configurationUpdated = false;
-        _logService.ConfigurationUpdated += () => configurationUpdated = true;
+        _dotLogsService.ConfigurationUpdated += () => configurationUpdated = true;
         while (!configurationUpdated)
             Thread.Sleep(100); // Wait for the configuration to be reloaded
 
@@ -142,27 +142,27 @@ public class LogServiceTest
             switch (message.Key)
             {
                 case LogEventLevel.Verbose:
-                    _logService.LogTrace(message.Value);
+                    _dotLogsService.LogTrace(message.Value);
                     break;
                 case LogEventLevel.Debug:
-                    _logService.LogDebug(message.Value);
+                    _dotLogsService.LogDebug(message.Value);
                     break;
                 case LogEventLevel.Information:
-                    _logService.LogInformation(message.Value);
+                    _dotLogsService.LogInformation(message.Value);
                     break;
                 case LogEventLevel.Warning:
-                    _logService.LogWarning(message.Value);
+                    _dotLogsService.LogWarning(message.Value);
                     break;
                 case LogEventLevel.Error:
-                    _logService.LogError(message.Value);
+                    _dotLogsService.LogError(message.Value);
                     break;
                 case LogEventLevel.Fatal:
-                    _logService.LogFatal(message.Value);
+                    _dotLogsService.LogFatal(message.Value);
                     break;
             }
 
-        var logFilePath = _logService.CurrentLogFile;
-        _logService.Dispose();
+        var logFilePath = _dotLogsService.CurrentLogFile;
+        _dotLogsService.Dispose();
 
         // Assert
         Assert.That(File.Exists(logFilePath), Is.True);
@@ -181,8 +181,8 @@ public class LogServiceTest
     public void LogService_CorrectlyDisableConsoleLogging()
     {
         // Act
-        _logService.DisableConsoleLogging();
-        var configuration = _logService.GetConfiguration();
+        _dotLogsService.DisableConsoleLogging();
+        var configuration = _dotLogsService.GetConfiguration();
         // Assert
         Assert.That(configuration.LogToConsole, Is.False);
     }
