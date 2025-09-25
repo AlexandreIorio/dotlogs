@@ -28,6 +28,29 @@ logs.ConfigurationUpdated += () => Console.WriteLine("Log configuration reloaded
 
 First run creates a `logs/` folder with a `logs.config` file. Edit it to modify behavior; changes are picked up automatically.
 
+## API at a glance
+
+**Logging methods:**
+- `LogTrace(message)`, `LogDebug(message)`, `LogInformation(message)`, `LogWarning(message)`, `LogError(message)`, `LogFatal(message)`
+
+**Log retrieval:**
+- `GetLogs(int nbDays)` — get logs from past N days
+- `GetLogs(DateTime? from)` — get logs from specific date/time
+- `GetLogs(DateTime from, LogEventLevel minLevel)` — get logs from date with minimum level
+- `GetLogs(int nbDays, LogEventLevel minLevel)` — get logs from past N days with minimum level
+- `GetLogs(LogEventLevel minLevel)` — get logs from last 24h with minimum level
+
+**Configuration:**
+- `SetConfiguration(LogServiceConfiguration)`, `GetConfiguration()`
+- `SetLevel(string level)` — change log level at runtime
+
+**Sink control:**
+- `EnableConsoleLogging()`, `DisableConsoleLogging()`, `EnableFileLogging()`, `DisableFileLogging()`
+
+**Properties:**
+- `CurrentLogFile` — path to the current log file
+- `ConfigurationUpdated` — event triggered when config file changes
+
 ## Build and test
 
 ```sh
