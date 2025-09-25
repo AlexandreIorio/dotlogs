@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.20">
     
     
       
@@ -26,7 +26,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.e53b48f4.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
@@ -362,6 +362,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#api-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      API at a glance
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#build-and-test" class="md-nav__link">
     <span class="md-ellipsis">
       Build and test
@@ -522,6 +531,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#api-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      API at a glance
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#build-and-test" class="md-nav__link">
     <span class="md-ellipsis">
       Build and test
@@ -568,6 +586,23 @@
 <span class="n">logs</span><span class="p">.</span><span class="n">ConfigurationUpdated</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&quot;Log configuration reloaded.&quot;</span><span class="p">);</span>
 </code></pre></div>
 <p>First run creates a <code>logs/</code> folder with a <code>logs.config</code> file. Edit it to modify behavior; changes are picked up automatically.</p>
+<h2 id="api-at-a-glance">API at a glance</h2>
+<p><strong>Logging methods:</strong>
+- <code>LogTrace(message)</code>, <code>LogDebug(message)</code>, <code>LogInformation(message)</code>, <code>LogWarning(message)</code>, <code>LogError(message)</code>, <code>LogFatal(message)</code></p>
+<p><strong>Log retrieval:</strong>
+- <code>GetLogs(int nbDays)</code> — get logs from past N days
+- <code>GetLogs(DateTime? from)</code> — get logs from specific date/time
+- <code>GetLogs(DateTime from, LogEventLevel minLevel)</code> — get logs from date with minimum level
+- <code>GetLogs(int nbDays, LogEventLevel minLevel)</code> — get logs from past N days with minimum level
+- <code>GetLogs(LogEventLevel minLevel)</code> — get logs from last 24h with minimum level</p>
+<p><strong>Configuration:</strong>
+- <code>SetConfiguration(LogServiceConfiguration)</code>, <code>GetConfiguration()</code>
+- <code>SetLevel(string level)</code> — change log level at runtime</p>
+<p><strong>Sink control:</strong>
+- <code>EnableConsoleLogging()</code>, <code>DisableConsoleLogging()</code>, <code>EnableFileLogging()</code>, <code>DisableFileLogging()</code></p>
+<p><strong>Properties:</strong>
+- <code>CurrentLogFile</code> — path to the current log file
+- <code>ConfigurationUpdated</code> — event triggered when config file changes</p>
 <h2 id="build-and-test">Build and test</h2>
 <div class="highlight"><pre><span></span><code><span class="c1"># Build and run tests for the solution</span>
 dotnet<span class="w"> </span>build<span class="w"> </span>src/DotLogs.sln<span class="w"> </span>--nologo
@@ -621,10 +656,10 @@ dotnet<span class="w"> </span><span class="nb">test</span><span class="w">  </sp
     
     
       
-      <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="../assets/javascripts/bundle.f55a23d4.min.js"></script>
       
     
   </body>
