@@ -213,15 +213,26 @@ public class DotLogsService : IDisposable
     /// <summary>
     ///     Sets the log level for the logger service.
     /// </summary>
-    /// <param name="level"></param>
-    public void SetLevel(string level)
+    /// <param name="level"> The log level to set (e.g., "Trace", "Debug", "Information", "Warning", "Error", "Fatal").</param>
+    /// <returns> True if the log level was successfully set; otherwise, false.</returns>
+    public bool SetLevel(string level)
     {
-        if (string.IsNullOrEmpty(level))
-            return;
+        if (string.IsNullOrWhiteSpace(level))
+        {
+            LogWarning("Attempted to set log level to null or empty string, ignoring");
+            return false;
+        }
+        var logLevel = level.ToLogLevel();
+        if (logLevel is null)
+        {
+            LogWarning("Invalid log level: {level}, ignoring");
+            return false;
+        }
 
         _configuration.LogLevel = level;
         LogInformation($"Log level changing to {level}");
         SetConfiguration(_configuration);
+        return true;
     }
 
     /// <summary>
@@ -331,19 +342,27 @@ public class DotLogsService : IDisposable
         var infos = entry.Split(']');
         if (infos.Length < 2)
             return null;
-        var dateString = infos[0].TrimStart('[');
-        var levelString = infos[1].TrimStart('[');
-        if (!DateTime.TryParse(dateString, out var date) || !Enum.TryParse<LogEventLevel>(levelString, out var level))
+        var dateString = infos[0].Split('[')[1];
+        var levelString = infos[1].Split('[')[1];
+        if (!DateTime.TryParse(dateString, out var date))
+            return null;
+        LogEventLevel? level = levelString.ToLogLevel();
+        if (level is null)
             return null;
         return new LogEntry()
         {
             Timestamp = date,
-            Level = level,
+            Level = (LogEventLevel)level,
             Contents = infos.Skip(2).Select(s => s.Trim()).ToList()
         };
     }
 
-    internal List<LogEntry> GetLogs(int nbDays)
+    /// <summary>
+    ///    Gets log entries from log files for the past specified number of days.
+    /// </summary>
+    /// <param name="nbDays"> The number of days to look back for log entries. If less than or equal to 0, defaults to 1 day.</param>
+    /// <returns> A list of log entries from the past specified number of days.</returns>
+    public List<LogEntry> GetLogs(int nbDays)
     {
         if (nbDays <= 0) nbDays = 1;
         return GetLogs(DateTime.UtcNow.AddDays(-nbDays));
@@ -352,9 +371,9 @@ public class DotLogsService : IDisposable
     /// <summary>
     ///    Gets log entries from log files starting from a specified date and time.
     /// </summary>
-    /// <param name="from"></param>
-    /// <returns></returns>
-    internal List<LogEntry> GetLogs(DateTime? from)
+    /// <param name="from"> The date and time from which to retrieve log entries. If null, defaults to 24 hours ago.</param>
+    /// <returns> A list of log entries from the specified date and time onward.</returns>
+    public List<LogEntry> GetLogs(DateTime? from)
     {
         if (from is null) from = DateTime.UtcNow.AddDays(-1);
         var logFiles = GetLogFiles();
@@ -369,9 +388,48 @@ public class DotLogsService : IDisposable
         return logEntries;
     }
 
+    /// <summary>
+    ///   Gets log entries from log files starting from a specified date and time and filtered by a minimum log level.
+    /// </summary>
+    /// <param name="from"> The date and time from which to retrieve log entries.</param>
+    /// <param name="minLevel"> The minimum log level to filter entries. Only entries with this level or higher will be returned.</param>
+    /// <returns> A list of log entries from the specified date and time onward that meet the minimum log level.</returns>
+    public List<LogEntry> GetLogs(DateTime from, LogEventLevel minLevel)    {
+        var logEntries = GetLogs(from);
+        return logEntries.Where(entry => entry.Level >= minLevel).ToList();
+    }
+
+    /// <summary>
+    ///   Gets log entries from log files starting from a specified number of days and filtered by a minimum log level.
+    /// </summary>
+    /// <param name="nbDays"> The number of days to look back for log entries. If less than or equal to 0, defaults to 1 day.</param>
+    /// <param name="minLevel"> The minimum log level to filter entries. Only entries with this level or higher will be returned.</param>
+    /// <returns> A list of log entries from the specified date and time onward that meet the minimum log level.</returns>
+    public List<LogEntry> GetLogs(int nbDays, LogEventLevel minLevel)    {
+        return GetLogs(DateTime.UtcNow.AddDays(-nbDays), minLevel);
+    }
+
+    /// <summary>
+    ///   Gets log entries from log files for the past 24 hours filtered by a minimum log level.
+    /// </summary>
+    /// <param name="minLevel"> The minimum log level to filter entries. Only entries with this level or higher will be returned.</param>
+    /// <returns> A list of log entries from the past 24 hours that meet the minimum log level.</returns>
+    public List<LogEntry> GetLogs(LogEventLevel minLevel)
+    {
+        return GetLogs(DateTime.UtcNow.AddDays(-1), minLevel);
+    }
+
+
     private void ConfigureLogger()
     {
-        _levelSwitch.MinimumLevel = _configuration.LogLevel.ToLogLevel();
+        var level = _configuration.LogLevel.ToLogLevel();
+        if (level is null)
+        {
+            LogWarning("Invalid log level in configuration, defaulting to information");
+            level = LogEventLevel.Information;
+        }
+
+        _levelSwitch.MinimumLevel = (LogEventLevel)level;
         var loggerConfig = new LoggerConfiguration().MinimumLevel.ControlledBy(_levelSwitch);
         if (_configuration.LogToConsole)
             loggerConfig = loggerConfig.WriteTo.Console(outputTemplate: _configuration.LogFormat);

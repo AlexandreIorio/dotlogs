@@ -17,7 +17,7 @@ public class DotLogsController : ControllerBase
     /// <param name="dotLogsService"> The logging service to be used by the controller.</param>
     public DotLogsController(DotLogsService dotLogsService)
     {
-        _dotLogsService = dotLogsService;
+        _dotLogsService = dotLogsService ?? throw new ArgumentNullException(nameof(dotLogsService));
     }
 
     /// <summary>
@@ -105,19 +105,41 @@ public class DotLogsController : ControllerBase
     /// </summary>
     /// <param name="level"> The desired logging level to set (e.g.,"Trace", "Debug", "Info", "Warning", "Error", "Fatal").</param>
     /// <returns> Code 200 with a message indicating the new log level, or an error message if the level is invalid.</returns>
-    [HttpPost("level")]
-    public IActionResult SetLogLevel([FromQuery] string level)
+    [HttpPost("level?level={level}")]
+    public IActionResult SetLogLevel(string level)
     {
         if (string.IsNullOrEmpty(level)) return BadRequest(new { message = "Log level cannot be null or empty." });
 
-        try
-        {
-            _dotLogsService.SetLevel(level);
+
+        if (_dotLogsService.SetLevel(level))
             return Ok(new { message = $"Log level set to {level}." });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+
+        return BadRequest(
+            "Impossible to set the log level. Valid levels are: Verbose, Debug, Information, Warning, Error, Fatal.");
+    }
+
+    /// <summary>
+    ///    This endpoint retrieves log entries from the last 24 hours by default.
+    /// </summary>
+    /// <returns> Code 200 with the list of log entries, or an error message if the 'from' parameter is invalid.</returns>
+    [HttpGet("logs")]
+    public IActionResult GetLogs()
+    {
+        return GetLogs(DateTime.UtcNow.AddDays(-1));
+    }
+
+    /// <summary>
+    ///    This endpoint retrieves log entries from the specified date and time onward.
+    /// </summary>
+    /// <param name="from"> The starting date and time from which to retrieve log entries.</param>
+    /// <returns> Code 200 with the list of log entries, or an error message if the 'from' parameter is invalid.</returns>
+    [HttpGet("logs?from={from:DateTime}")]
+    public IActionResult GetLogs(DateTime from)
+    {
+        if (from == default)
+            return BadRequest(new { message = "The 'from' query parameter is required and must be a valid date." });
+
+        var logs = _dotLogsService.GetLogs(from);
+        return Ok(logs);
     }
 }

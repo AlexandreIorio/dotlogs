@@ -5,7 +5,7 @@ namespace DotLogs;
 /// <summary>
 ///    Represents a log entry with timestamp, level, and contents.
 /// </summary>
-internal class LogEntry
+public class LogEntry
 {
     /// <summary>
     ///   The timestamp of the log entry.

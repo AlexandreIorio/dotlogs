@@ -4,17 +4,17 @@ namespace DotLogs;
 
 internal static class LogLevelExtension
 {
-    internal static LogEventLevel ToLogLevel(this string level)
+    internal static LogEventLevel? ToLogLevel(this string level)
     {
         return level.ToLower() switch
         {
-            "verbose" or "trace" => LogEventLevel.Verbose,
-            "debug" => LogEventLevel.Debug,
-            "information" => LogEventLevel.Information,
-            "warning" => LogEventLevel.Warning,
-            "error" => LogEventLevel.Error,
-            "fatal" => LogEventLevel.Fatal,
-            _ => LogEventLevel.Information
+            "verbose" or "trace" or "vrb" => LogEventLevel.Verbose,
+            "debug" or "dbg" => LogEventLevel.Debug,
+            "information" or "inf" => LogEventLevel.Information,
+            "warning" or "wrn" => LogEventLevel.Warning,
+            "error" or "err" => LogEventLevel.Error,
+            "fatal" or "ftl" => LogEventLevel.Fatal,
+            _ => null
         };
     }
 }
