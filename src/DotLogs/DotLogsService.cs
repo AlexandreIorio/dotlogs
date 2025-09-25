@@ -301,6 +301,17 @@ public class DotLogsService : IDisposable
         File.WriteAllText(LogsConfigFilePath, content);
     }
 
+    private List<string> GetLogFiles()
+    {
+        if (!Directory.Exists(LogsFolder))
+            return [];
+
+        var files = Directory.GetFiles(LogsFolder)
+            .Where(file => !file.Equals(LogsConfigFilePath))
+            .ToList();
+        return files;
+    }
+
     private string GetLastEditedLogFile()
     {
         var logFiles = Directory.GetFiles(LogsFolder);
@@ -313,6 +324,49 @@ public class DotLogsService : IDisposable
             .OrderByDescending(file => file.LastWriteTime)
             .FirstOrDefault()
             ?.FullName ?? string.Empty;
+    }
+
+    private LogEntry? ExtractInfoFromLogEntry(string entry)
+    {
+        var infos = entry.Split(']');
+        if (infos.Length < 2)
+            return null;
+        var dateString = infos[0].TrimStart('[');
+        var levelString = infos[1].TrimStart('[');
+        if (!DateTime.TryParse(dateString, out var date) || !Enum.TryParse<LogEventLevel>(levelString, out var level))
+            return null;
+        return new LogEntry()
+        {
+            Timestamp = date,
+            Level = level,
+            Contents = infos.Skip(2).Select(s => s.Trim()).ToList()
+        };
+    }
+
+    internal List<LogEntry> GetLogs(int nbDays)
+    {
+        if (nbDays <= 0) nbDays = 1;
+        return GetLogs(DateTime.UtcNow.AddDays(-nbDays));
+    }
+
+    /// <summary>
+    ///    Gets log entries from log files starting from a specified date and time.
+    /// </summary>
+    /// <param name="from"></param>
+    /// <returns></returns>
+    internal List<LogEntry> GetLogs(DateTime? from)
+    {
+        if (from is null) from = DateTime.UtcNow.AddDays(-1);
+        var logFiles = GetLogFiles();
+        var logEntries = new List<LogEntry>();
+        foreach (var file in logFiles)
+        {
+            var logsStr = File.ReadAllLines(file);
+            var logs = logsStr.Select(ExtractInfoFromLogEntry).Where(entry => entry != null && entry.Timestamp >= from.Value).Cast<LogEntry>().ToList();
+            logEntries.AddRange(logs);
+        }
+        logEntries = logEntries.OrderBy(entry => entry.Timestamp).ToList();
+        return logEntries;
     }
 
     private void ConfigureLogger()
@@ -398,103 +452,5 @@ public class DotLogsService : IDisposable
         Log.CloseAndFlush();
         ConfigureLogger();
         LogInformation("Logger reconfigured with new settings");
-    }
-}
-
-/// <summary>
-///     Configuration settings for the <see cref="DotLogsService" />.
-/// </summary>
-public sealed class LogServiceConfiguration
-{
-    /// <summary>
-    ///     The default log format template.
-    /// </summary>
-    public const string LogFormatTemplate =
-        "[{Timestamp:yyyy-MM-dd HH:mm:ss}] [{Level:u3}] [{Caller}] [{file}:{line}] {Message:lj}\n";
-
-    /// <summary>
-    ///     Indicates whether to log messages to the console.
-    /// </summary>
-    public bool LogToConsole { get; set; } = true;
-
-    /// <summary>
-    ///     Indicates whether to log messages to a file.
-    /// </summary>
-    public bool LogToFile { get; set; } = true;
-
-    /// <summary>
-    ///     The minimum log level for messages to be logged.
-    /// </summary>
-    public string LogLevel { get; set; } = "Information";
-
-    /// <summary>
-    ///     The number of log files to retain based on the rolling interval.
-    /// </summary>
-    public int Period { get; set; } = 30;
-
-    /// <summary>
-    ///     The interval at which log files are rolled over.
-    /// </summary>
-    public RollingInterval RollingInterval { get; set; } = RollingInterval.Day;
-
-    /// <summary>
-    ///     The name of the log file.
-    /// </summary>
-    public string LogFileName { get; set; } = "log.txt";
-
-    /// <summary>
-    ///     The format template for log messages.
-    /// </summary>
-    public string LogFormat { get; set; } = LogFormatTemplate;
-
-    /// <summary>
-    ///     Creates a copy of the current configuration.
-    /// </summary>
-    /// <returns> A new instance of <see cref="LogServiceConfiguration" /> with the same property values.</returns>
-    public LogServiceConfiguration Copy()
-    {
-        return new LogServiceConfiguration
-        {
-            LogLevel = LogLevel,
-            Period = Period,
-            RollingInterval = RollingInterval,
-            LogFileName = LogFileName,
-            LogFormat = LogFormat,
-            LogToConsole = LogToConsole,
-            LogToFile = LogToFile
-        };
-    }
-
-    /// <summary>
-    ///     Determines whether the specified object is equal to the current configuration.
-    /// </summary>
-    /// <param name="obj"> The object to compare with the current configuration.</param>
-    /// <returns> True if the specified object is equal to the current configuration; otherwise, false.</returns>
-    public new bool Equals(object? obj)
-    {
-        if (obj is not LogServiceConfiguration other)
-            return false;
-        return LogLevel == other.LogLevel
-               && Period == other.Period
-               && RollingInterval == other.RollingInterval
-               && LogFileName == other.LogFileName
-               && LogFormat == other.LogFormat;
-    }
-}
-
-internal static class LogLevelExtension
-{
-    internal static LogEventLevel ToLogLevel(this string level)
-    {
-        return level.ToLower() switch
-        {
-            "verbose" or "trace" => LogEventLevel.Verbose,
-            "debug" => LogEventLevel.Debug,
-            "information" => LogEventLevel.Information,
-            "warning" => LogEventLevel.Warning,
-            "error" => LogEventLevel.Error,
-            "fatal" => LogEventLevel.Fatal,
-            _ => LogEventLevel.Information
-        };
     }
 }
