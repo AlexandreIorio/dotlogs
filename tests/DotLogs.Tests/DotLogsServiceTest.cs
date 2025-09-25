@@ -249,6 +249,7 @@ public class DotLogsServiceTest
                 dotLogsService1.LogInformation(messages1[i]);
                 dotLogsService2.LogInformation(messages2[i]);
             }
+
             var logFilePath = dotLogsService1.CurrentLogFile;
             // Assert
             Assert.That(File.Exists(logFilePath), Is.True);
@@ -265,5 +266,63 @@ public class DotLogsServiceTest
                 Assert.That(logContent, Does.Contain(messages2[i]));
             }
         }
+    }
+
+    [Test]
+    public void GetLogs_CorrectlyRetrieveLogs()
+    {
+        // Arrange
+        var message1 = "This is an information message from instance 1.";
+        var message2 = "This is an information message from instance 2.";
+
+        // Act
+        _dotLogsService.LogInformation(message1);
+        _dotLogsService.LogInformation(message2);
+        var logs = _dotLogsService.GetLogs(1);
+        // Assert
+        Assert.That(logs, Is.Not.Null);
+        Assert.That(logs.Count, Is.GreaterThanOrEqualTo(2));
+        Assert.That(logs.Any(log => log.Contents.Any(content => content.Contains(message1))), Is.True);
+        Assert.That(logs.Any(log => log.Contents.Any(content => content.Contains(message2))), Is.True);
+    }
+
+    [Test]
+    public void GetLogs_CorrectlyRetrieveLogsWithDifferentLevel()
+    {
+        // Arrange
+        var message = "test_this";
+        // Act
+        _dotLogsService.SetLevel("Trace");
+        _dotLogsService.LogTrace(message);
+        _dotLogsService.LogInformation(message);
+        _dotLogsService.LogDebug(message);
+        _dotLogsService.LogWarning(message);
+        _dotLogsService.LogError(message);
+        _dotLogsService.LogFatal(message);
+        var logs = _dotLogsService.GetLogs(1)
+            .Where(l => l.Contents.Any(lo => lo.Equals(message))).ToList();
+        // Assert
+        Assert.That(logs, Is.Not.Null);
+        Assert.That(logs.Count, Is.EqualTo(6));
+    }
+
+    [Test]
+    public void GetLogs_CorrectlyRetrieveLogsWithMinimumLevel()
+    {
+        // Arrange
+        var message = "test_this";
+        // Act
+        _dotLogsService.SetLevel("Trace");
+        _dotLogsService.LogTrace(message);
+        _dotLogsService.LogDebug(message);
+        _dotLogsService.LogInformation(message);
+        _dotLogsService.LogWarning(message);
+        _dotLogsService.LogError(message);
+        _dotLogsService.LogFatal(message);
+        var logs = _dotLogsService.GetLogs(1,LogEventLevel.Information)
+            .Where(l => l.Contents.Any(lo => lo.Equals(message))).ToList();
+        // Assert
+        Assert.That(logs, Is.Not.Null);
+        Assert.That(logs.Count, Is.EqualTo(4));
     }
 }

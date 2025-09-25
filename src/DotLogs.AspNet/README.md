@@ -29,6 +29,7 @@ This registers `DotLogsController` at route base `api/DotLogs`.
 
 ## Endpoints
 
+**Configuration and control:**
 - `POST /api/DotLogs/enable` — enable console and file logging
 - `POST /api/DotLogs/disable` — disable console and file logging
 - `POST /api/DotLogs/enable-console` — enable console logging
@@ -38,10 +39,25 @@ This registers `DotLogsController` at route base `api/DotLogs`.
 - `POST /api/DotLogs/level?level=Debug` — set minimum log level
 - `GET  /api/DotLogs/status` — get current configuration
 
+**Log retrieval:**
+- `GET /api/DotLogs/logs` — get logs from last 24 hours
+- `GET /api/DotLogs/logs?from={datetime}` — get logs from specific date/time
+
 ## Examples
 
 ```sh
+# Set log level
 curl -X POST "http://localhost:5000/api/DotLogs/level?level=Trace"
+
+# Disable console logging
 curl -X POST "http://localhost:5000/api/DotLogs/disable-console"
-curl -X GET  "http://localhost:5000/api/DotLogs/status"
+
+# Get current status
+curl -X GET "http://localhost:5000/api/DotLogs/status"
+
+# Get logs from last 24 hours
+curl -X GET "http://localhost:5000/api/DotLogs/logs"
+
+# Get logs from specific date
+curl -X GET "http://localhost:5000/api/DotLogs/logs?from=2025-09-01T00:00:00Z"
 ```

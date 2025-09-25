@@ -12,10 +12,12 @@ Target framework: .NET 9.0
 ## Features
 
 - Simple API: LogTrace, LogDebug, LogInformation, LogWarning, LogError, LogFatal
+- Log retrieval: GetLogs with filtering by date range, number of days, and minimum level
 - Console and/or file sinks with Serilog
 - Hot-reloadable configuration via `logs/logs.config` (watched at runtime)
+- Change level at runtime programmatically or via endpoints
 - Retention and rolling interval for files
-- ASP.NET Core controller with endpoints to enable/disable sinks and set level
+- ASP.NET Core controller with endpoints to manage logging and retrieve logs
 
 ## Installation
 
@@ -80,6 +82,30 @@ Notes:
 - `RollingInterval` is serialized as a numeric enum by default (Serilog RollingInterval). The default corresponds to Day.
 - Changing the file updates the active logger immediately (no restart required).
 
+## API overview
+
+**Logging methods:**
+- `LogTrace(message)`, `LogDebug(message)`, `LogInformation(message)`, `LogWarning(message)`, `LogError(message)`, `LogFatal(message)`
+
+**Log retrieval:**
+- `GetLogs(int nbDays)` — get logs from past N days
+- `GetLogs(DateTime? from)` — get logs from specific date/time
+- `GetLogs(DateTime from, LogEventLevel minLevel)` — get logs from date with minimum level
+- `GetLogs(int nbDays, LogEventLevel minLevel)` — get logs from past N days with minimum level
+- `GetLogs(LogEventLevel minLevel)` — get logs from last 24h with minimum level
+
+**Configuration:**
+- `SetConfiguration(LogServiceConfiguration)`, `GetConfiguration()`
+- `SetLevel(string level)` — change log level at runtime
+
+**Sink control:**
+- `EnableConsoleLogging()`, `DisableConsoleLogging()`
+- `EnableFileLogging()`, `DisableFileLogging()`
+
+**Properties:**
+- `CurrentLogFile` — path to the current log file
+- `ConfigurationUpdated` — event triggered when config file changes
+
 ## ASP.NET Core integration (optional)
 
 `DotLogs.AspNet` exposes a controller with runtime endpoints. Register the service and controllers:
@@ -98,6 +124,7 @@ app.Run();
 
 Endpoints (base route `api/DotLogs`):
 
+**Configuration and control:**
 - `POST /api/DotLogs/enable` — enable console and file logging
 - `POST /api/DotLogs/disable` — disable console and file logging
 - `POST /api/DotLogs/enable-console` — enable console logging
@@ -107,11 +134,24 @@ Endpoints (base route `api/DotLogs`):
 - `POST /api/DotLogs/level?level=Debug` — set minimum level
 - `GET /api/DotLogs/status` — get current configuration
 
+**Log retrieval:**
+- `GET /api/DotLogs/logs` — get logs from last 24 hours
+- `GET /api/DotLogs/logs?from={datetime}` — get logs from specific date/time
+
 Example calls:
 
 ```sh
-curl -X POST http://localhost:5000/api/DotLogs/level?level=Trace
-curl -X GET  http://localhost:5000/api/DotLogs/status
+# Set log level
+curl -X POST "http://localhost:5000/api/DotLogs/level?level=Trace"
+
+# Get current status
+curl -X GET "http://localhost:5000/api/DotLogs/status"
+
+# Get logs from last 24 hours
+curl -X GET "http://localhost:5000/api/DotLogs/logs"
+
+# Get logs from specific date
+curl -X GET "http://localhost:5000/api/DotLogs/logs?from=2025-09-01T00:00:00Z"
 ```
 
 # Contributions
