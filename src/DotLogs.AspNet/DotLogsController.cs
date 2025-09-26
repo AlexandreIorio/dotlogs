@@ -105,7 +105,7 @@ public class DotLogsController : ControllerBase
     /// </summary>
     /// <param name="level"> The desired logging level to set (e.g.,"Trace", "Debug", "Info", "Warning", "Error", "Fatal").</param>
     /// <returns> Code 200 with a message indicating the new log level, or an error message if the level is invalid.</returns>
-    [HttpPost("level?level={level}")]
+    [HttpPost("level={level}")]
     public IActionResult SetLogLevel(string level)
     {
         if (string.IsNullOrEmpty(level)) return BadRequest(new { message = "Log level cannot be null or empty." });
@@ -133,7 +133,7 @@ public class DotLogsController : ControllerBase
     /// </summary>
     /// <param name="from"> The starting date and time from which to retrieve log entries.</param>
     /// <returns> Code 200 with the list of log entries, or an error message if the 'from' parameter is invalid.</returns>
-    [HttpGet("logs?from={from:DateTime}")]
+    [HttpGet("logs/from={from:DateTime}")]
     public IActionResult GetLogs(DateTime from)
     {
         if (from == default)
