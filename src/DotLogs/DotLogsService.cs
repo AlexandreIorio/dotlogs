@@ -432,14 +432,14 @@ public class DotLogsService : IDisposable
         _levelSwitch.MinimumLevel = (LogEventLevel)level;
         var loggerConfig = new LoggerConfiguration().MinimumLevel.ControlledBy(_levelSwitch);
         if (_configuration.LogToConsole)
-            loggerConfig = loggerConfig.WriteTo.Console(outputTemplate: _configuration.LogFormat);
+            loggerConfig = loggerConfig.WriteTo.Console(outputTemplate: _configuration.GetCompleteLogFormat());
 
         if (_configuration.LogToFile)
             loggerConfig = loggerConfig.WriteTo.File(
                 Path.Combine(LogsFolder, _configuration.LogFileName),
                 rollingInterval: _configuration.RollingInterval,
                 retainedFileCountLimit: _configuration.Period,
-                outputTemplate: _configuration.LogFormat
+                outputTemplate: _configuration.GetCompleteLogFormat()
             );
 
         Log.Logger = loggerConfig.CreateLogger();
