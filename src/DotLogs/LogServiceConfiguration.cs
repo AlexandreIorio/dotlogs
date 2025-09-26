@@ -49,7 +49,17 @@ public sealed class LogServiceConfiguration
     /// <summary>
     ///     The format template for log messages.
     /// </summary>
-    public string LogFormat { get; set; } = LogBaseTemplate + " " + LogFormatTemplate;
+    public string LogFormat { get; init; } = LogFormatTemplate;
+
+    /// <summary>
+    ///    Gets the complete log format by combining the base template with the user-defined format.
+    /// </summary>
+    /// <returns> The complete log format string.</returns>
+    public string GetCompleteLogFormat()
+    {
+        return LogBaseTemplate + " " + LogFormat;
+    }
+
 
     /// <summary>
     ///     Creates a copy of the current configuration.
